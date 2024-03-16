@@ -5,25 +5,38 @@
 // parsing_map
 //
 
-//use std::fs;
+use std::fs;
 use std::env;
 use std::process;
 
 fn test_argv()
 {
-    if env::args().len() > 2{
+    let argv: Vec<String> = env::args().collect();
+
+    if argv.len() > 2{
         println!("Too many Argument");
         process::exit(1);
     }
-    if env::args().len() < 2{
+    if argv.len() < 2{
         println!("Not enought argument");
         process::exit(1);
     }
 }
 
-pub fn parsing_map() -> String
+fn read_map() -> Vec<String>
 {
-    let map = String::from("0");
+    let argv: Vec<String> = env::args().collect();
+    fs::read_to_string(argv[1].as_str())
+        .unwrap()
+        .lines()
+        .map(String::from)
+        .collect()
+}
+
+pub fn load_map() -> Vec<String>
+{
     test_argv();
+    let mut map: Vec<String> = read_map();
+    map.remove(0);
     map
 }
