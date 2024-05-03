@@ -17,7 +17,7 @@ fn main() {
     let mut bsq = BSQ {
         height: 0,
         width: 0,
-        map: Vec::new(),
+        map: String::new(),
         size: 2,
         x: 3,
         y: 3,

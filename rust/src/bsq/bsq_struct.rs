@@ -6,12 +6,12 @@
 //
 
 use crate::bsq::parse::Parse;
-use std::fs;
+use std::{fs, u32, usize};
 
 pub struct BSQ {
     pub height: u32,
     pub width: u32,
-    pub map: Vec<String>,
+    pub map: String,
     pub x: u32,
     pub y: u32,
     pub size: u32,
@@ -25,26 +25,31 @@ impl Parse for BSQ {
         self.height = lines[0].trim().parse().expect("Issue to get the height");
         self.width = lines[1].trim().len() as u32;
         lines.remove(0);
-        self.map = lines;
+        self.map = lines.join("\n");
     }
 
     fn find_bsq(&mut self, x: u32, y: u32) {
-        let mut size_square = self.size + 1;
+        let mut size_square = 1;
 
         loop {
             if x + size_square > self.width || y + size_square > self.height {
                 return;
             }
             for height in 0..size_square {
-                for width in 0..size_square {
-                    if self.get_sell(x + width, y + height) != '.' {
-                        return;
-                    }
+                if self.get_sell(x + size_square - 1, y + height) != '.' {
+                    return;
                 }
             }
-            self.x = x;
-            self.y = y;
-            self.size = size_square;
+            for width in 0..size_square {
+                if self.get_sell(x + width, y + size_square - 1) != '.' {
+                    return;
+                }
+            }
+            if size_square > self.size {
+                self.x = x;
+                self.y = y;
+                self.size = size_square;
+            }
             size_square += 1;
         }
     }
@@ -60,15 +65,20 @@ impl Parse for BSQ {
     }
 
     fn get_sell(&self, x: u32, y: u32) -> char {
-        self.map[x as usize].chars().nth(y as usize).unwrap()
+        self.map.as_bytes()[((y * (self.width + 1)) + x) as usize] as char
     }
 
     fn replace_bsq(&mut self) {
-        for height in self.x..(self.x + self.size) {
-            for width in self.y..(self.y + self.size) {
-                let x_usize = width as usize;
-                self.map[height as usize].replace_range(x_usize..(x_usize + 1), "x");
-            }
+        for height in self.y..(self.y + self.size) {
+            let index = (height * (self.width + 1) + self.x) as usize;
+            self.map.replace_range(
+                index..index + self.size as usize,
+                &x_size(self.size as usize),
+            );
         }
     }
+}
+
+fn x_size(size: usize) -> String {
+    "X".repeat(size)
 }
