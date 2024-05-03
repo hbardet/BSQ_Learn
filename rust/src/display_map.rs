@@ -5,9 +5,8 @@
 // display_map
 //
 
-pub fn display_map(map: Vec<String>)
-{
+pub fn display_map(map: Vec<String>) {
     for item in map {
-        println!(item);
+        println!("{}", item);
     }
 }
