@@ -1,0 +1,40 @@
+---
+version: "3.3"
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      GF_INSTALL_PLUGINS: yesoreyeram-infinity-datasource
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - grafana-conf:/etc/grafana
+      - ${PWD}/config/grafana.ini:/etc/grafana/grafana.ini
+      - ./config/hosts:/etc/hosts
+    depends_on:
+      - nginx_data
+    networks:
+      - data-networks
+
+  nginx_data:
+    image: nginx
+    container_name: nginx_data
+    ports:
+      - 8080:80
+    volumes:
+      - ./data:/usr/share/nginx/html/data:ro
+    environment:
+      - NGINX_HOST=nginx_data
+      - NGINX_PORT=80
+    networks:
+      - data-networks
+
+volumes:
+  grafana-data:
+  grafana-conf:
+
+networks:
+  data-networks:

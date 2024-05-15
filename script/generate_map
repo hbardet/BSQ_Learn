@@ -1,0 +1,14 @@
+#!/bin/bash
+g++ ../generator/main.cpp -std=c++20 -o generator
+for var in "$@" 
+do
+    echo "creating map of ${var}x${var}"
+    ./generator ${var} 30
+    echo "creating map resolve of ${var}x${var}"
+    ../rust/bsq_learn map_${var}_${var} > tmp_resolve
+    echo "move created map to map folder"
+    mv map_${var}_${var} ../bsq_map/map_default
+    mv tmp_resolve ../bsq_map/map_resolve/map_${var}_${var}
+done
+rm generator
+echo "everything is done"

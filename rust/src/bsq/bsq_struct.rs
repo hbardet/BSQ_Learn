@@ -80,5 +80,5 @@ impl Parse for BSQ {
 }
 
 fn x_size(size: usize) -> String {
-    "X".repeat(size)
+    "x".repeat(size)
 }

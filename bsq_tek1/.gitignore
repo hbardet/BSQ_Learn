@@ -1,0 +1,9 @@
+**.a
+*.o
+*.log
+bsq_learn
+mouli_maps
+mouli_maps_solved
+.vscode
+results
+*script.sh*
