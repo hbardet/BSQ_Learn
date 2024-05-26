@@ -25,13 +25,13 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./data:/usr/share/nginx/html/data:ro
+      -  ${PWD}/data:/usr/share/nginx/html/data
     environment:
       - NGINX_HOST=nginx_data
       - NGINX_PORT=80
     networks:
       - data-networks
-
+    
 volumes:
   grafana-data:
   grafana-conf:

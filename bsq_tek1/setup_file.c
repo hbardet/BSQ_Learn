@@ -4,8 +4,8 @@
 ** File description:
 ** setup_file
 */
-#include "my_bsq.h"
-#include "my.h"
+#include "./include/my_bsq.h"
+#include "./include/my.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -23,7 +23,7 @@ int get_size_files(char const *filepath)
 char *load_file_in_mem(char const *filepath)
 {
     int fd = fs_open_file(filepath);
-    int size;
+    unsigned int size;
     char *buffer;
     if (fd == -1)
         return (NULL);

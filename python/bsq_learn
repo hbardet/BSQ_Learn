@@ -1,0 +1,18 @@
+#!/bin/python3
+
+from bsq_struct import Bsq
+from sys import argv
+
+def main():
+    bsq_p = Bsq()
+    if (len(argv) != 2):
+        exit(84)
+    bsq_p.loadMap(argv[1])
+    bsq_p.parseMap()
+    bsq_p.replace_bsq()
+    print("".join(bsq_p.map), end="")
+
+
+if __name__ == "__main__":
+    main()
+

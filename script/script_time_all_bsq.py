@@ -28,6 +28,27 @@ class MODE(Enum):
     ONLY = 1
     EXCLUDE = 2
 
+def update_csv(path, data):
+    with open(path, 'r', newline='') as read_csvfile:
+        reader = csv.DictReader(read_csvfile)
+        rows = list(reader)
+
+    updated = False
+
+    for row in rows:
+        if row['Language'] == data['Language']:
+            for key in data.keys():
+                row[key] = data[key]
+            updated = True
+            break
+    if not updated:
+        rows.append(data)
+
+    with open(path, 'w', newline='') as write_csvfile:
+        writer = csv.DictWriter(write_csvfile, fieldnames=data.keys())
+        writer.writeheader()
+        writer.writerows(rows)
+
 
 def get_subdirectories():
     current_directory = "../"   # Obtient le répertoire de travail actuel
@@ -62,26 +83,14 @@ def exec_all_map(bin):
     files = os.listdir(BSQ_MAP_DEFAULT)
     data_time = {'Language': bin.split("/")[-1]}
     data_return = {'Language': bin.split("/")[-1]}
-    
-    i = 0
+
     for map_file in files:
-        execution_time, return_code = execute_and_measure_time(bin + "/" + BIN_NAME, map_file,)
+        execution_time, return_code = execute_and_measure_time(bin + "/" + BIN_NAME, map_file)
         data_time[map_file] = execution_time
         data_return[map_file] = return_code
-    time_output_file = "../data/time_value.csv"
-    return_output_file = "../data/return_value.csv"
-    with open(time_output_file, 'a', newline='') as time_csvfile, \
-         open(return_output_file, 'a', newline='') as return_csvfile:
 
-        time_csvwriter = csv.DictWriter(time_csvfile, fieldnames=data_time.keys())
-        if time_csvfile.tell() == 0:
-            time_csvwriter.writeheader()
-        time_csvwriter.writerow(data_time)
-
-        return_csvwriter = csv.DictWriter(return_csvfile, fieldnames=data_return.keys())
-        if return_csvfile.tell() == 0:
-            return_csvwriter.writeheader()
-        return_csvwriter.writerow(data_return)
+    update_csv("../data/time_value.csv", data_time)
+    update_csv("../data/return_value.csv", data_return)
 
 def make_binary(path):
     if (not makefile_is_present(path)):
@@ -92,9 +101,10 @@ def make_binary(path):
 def test_bsq(path):
     if (not make_binary("../" + path)):
         return
-    print(f"{bcolors.OKCYAN}{{==== START {path} BSQ ====}}{bcolors.RESET}")
+    print(f"{bcolors.OKCYAN}{{==== START {path} BSQ ====}}Exiting{bcolors.RESET}")
     exec_all_map("../" + path)
     print(f"{bcolors.OKCYAN}{{====  END {path} BSQ  ====}}{bcolors.RESET}")
+
 
 def only_dirs(dirs):
     tmp_dirs = dirs[:]
@@ -102,7 +112,7 @@ def only_dirs(dirs):
         for i in range(2, len(argv)):
             if (dirs[j] == argv[i]):
                 break
-        else : 
+        else: 
             tmp_dirs.remove(dirs[j])
     return tmp_dirs
 

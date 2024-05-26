@@ -24,7 +24,7 @@ OBJ 	= 	$(SRC:.c=.o)
 
 NAME	= 	bsq_learn
 
-CFLAGS +=	-Wextra -Wall -W -I./include -g -L./lib/my -lmy
+CFLAGS +=	-Wextra -Wall -W -I./include -L./lib/my -lmy -O2
 
 CRIFLAGS += 	--coverage -lcriterion
 
