@@ -8,15 +8,25 @@ const Error = error{
 };
 
 pub fn main() !void {
+    // Get the command-line arguments
+    const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
+        std.debug.print("Failed to allocate arguments: {}\n", .{err});
+        return err;
+    };
+    defer std.process.argsFree(std.heap.page_allocator, args);
 
-    // Récupérer les arguments de la ligne de commande
+    // Verify that there is at least one argument (the program name itself)
+    if (args.len < 2) {
+        std.debug.print("Usage: {s} <file_path>\n", .{args[0]});
+        return Error.BadNbrArgument;
+    }
 
-    // Vérifier qu'il y a au moins un argument (le nom du programme)
-    // Chemin du fichier à ouvrir
+    // Get the file path from the arguments
+    const file_path = args[1];
 
-    // Ouvrir le fichier et récupérer son contenu
-    const fileContents = try open_file.open_file();
+    // Open the file and retrieve its content
+    const fileContents = try open_file.open_file(file_path);
 
-    // Afficher le contenu du fichier
-    print("Contenu du fichier '':\n{}\n", .{fileContents});
+    // Display the content of the file
+    print("File content:\n{s}\n", .{fileContents});
 }
