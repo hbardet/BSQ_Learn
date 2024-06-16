@@ -14,4 +14,5 @@ This repository is dedicated to working with different programming languages. Th
 |🐍 Python|0.019|0.040|0.222|0.898|3.401|21.637|324.363|2350.169|79.615|
 |💻 Assembly|In Work|In Work|In Work|In Work|In Work|In Work|In Work|In Work|In Work|
 |⚡ Zig|In Work|In Work|In Work|In Work|In Work|In Work|In Work|In Work|In Work|
+
 *time in second*
