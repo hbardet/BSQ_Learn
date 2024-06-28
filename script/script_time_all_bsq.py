@@ -7,7 +7,7 @@ import os
 from sys import argv
 from enum import Enum
 from concurrent.futures import ThreadPoolExecutor
-
+### MACRO ###
 BIN_NAME = "bsq_learn"
 BSQ_MAP_DEFAULT = "../bsq_map/map_default/"
 BSQ_MAP_RESOLVE = "../bsq_map/map_resolve/"
@@ -28,14 +28,29 @@ class MODE(Enum):
     DEFAULT = 0
     ONLY = 1
     EXCLUDE = 2
+### MACRO ###
+
+### CSV ###
+def parse_map_size(map_name):
+    try:
+        size = map_name.split('_')[1]
+        return int(size)
+    except (IndexError, ValueError):
+        return float('inf')
+
+def sort_csv(data):
+    sorted_keys = sorted(data.keys(), key=parse_map_size)
+    return {k: data[k] for k in sorted_keys}
 
 def update_csv(path, data):
+    data = sort_csv(data)
+    
     with open(path, 'r', newline='') as read_csvfile:
         reader = csv.DictReader(read_csvfile)
         rows = list(reader)
-
+    
     updated = False
-
+    
     for row in rows:
         if row['Language'] == data['Language']:
             for key in data.keys():
@@ -44,18 +59,42 @@ def update_csv(path, data):
             break
     if not updated:
         rows.append(data)
-
+    
     with open(path, 'w', newline='') as write_csvfile:
         writer = csv.DictWriter(write_csvfile, fieldnames=data.keys())
         writer.writeheader()
         writer.writerows(rows)
+### CSV ###
 
+### FILE HANDLING ###
 def get_subdirectories():
     current_directory = "../"
     directories = [d for d in os.listdir(current_directory) if os.path.isdir(os.path.join(current_directory, d))]
     bsq_directories = [d for d in directories if os.path.isfile(os.path.join(current_directory, d, ".bsq"))]
     return bsq_directories
 
+def makefile_is_present(directory):
+    return os.path.isfile(os.path.join(directory, "Makefile"))
+
+def is_bsq_directory(directory):
+    return os.path.isfile(os.path.join(directory, ".bsq"))
+
+def only_dirs(dirs):
+    return [d for d in dirs if d in argv[2:]]
+
+def exclude_dirs(dirs):
+    return [d for d in dirs if d not in argv[2:]]
+
+def make_binary(path):
+    if not is_bsq_directory(path):
+        return False
+    if makefile_is_present(path):
+        subprocess.run(f"make --silent -C {path}", shell=True)
+    return True
+
+### FILE HANDLING ###
+
+### EXECUTION ###
 def execute_and_measure_time(language, executable_path, map_path):
     tmp_file = f"tmp_{language}_{map_path}"
     try:
@@ -78,13 +117,10 @@ def execute_and_measure_time(language, executable_path, map_path):
         if os.path.exists(tmp_file):
             os.remove(tmp_file)
 
-def makefile_is_present(directory):
-    return os.path.isfile(os.path.join(directory, "Makefile"))
+### EXECUTION ###
 
-def is_bsq_directory(directory):
-    return os.path.isfile(os.path.join(directory, ".bsq"))
-
-def exec_all_map(bin):
+### THREADING ###
+def exec_all_map_threaded(bin):
     language = bin.split("/")[-1]
     files = os.listdir(BSQ_MAP_DEFAULT)
     data_time = {'Language': language}
@@ -101,34 +137,58 @@ def exec_all_map(bin):
     update_csv("../data/time_value.csv", data_time)
     update_csv("../data/return_value.csv", data_return)
 
-def make_binary(path):
-    if not is_bsq_directory(path):
-        return False
-    if makefile_is_present(path):
-        subprocess.run(f"make --silent -C {path}", shell=True)
-    return True
-
-def test_bsq(path):
+def test_bsq_threaded(path):
     if not make_binary("../" + path):
         return
     print(f"{bcolors.OKCYAN}{{==== START {path} BSQ ====}}{bcolors.RESET}")
-    exec_all_map("../" + path)
+    exec_all_map_threaded("../" + path)
     print(f"{bcolors.OKCYAN}{{====  END {path} BSQ  ====}}{bcolors.RESET}")
 
-def only_dirs(dirs):
-    return [d for d in dirs if d in argv[2:]]
+def test_all_bsq_Threaded(dirs):
+    with ThreadPoolExecutor() as executor:
+        executor.map(test_bsq_threaded, dirs)
+### THREADING ###
 
-def exclude_dirs(dirs):
-    return [d for d in dirs if d not in argv[2:]]
+### SINGLE ###
+def exec_all_map_single(bin):
+    language = bin.split("/")[-1]
+    files = os.listdir(BSQ_MAP_DEFAULT)
+    data_time = {'Language': language}
+    data_return = {'Language': language}
 
+    for map_file in files:
+        execution_time, return_code = execute_and_measure_time(language, bin + "/" + BIN_NAME, map_file)
+        data_time[map_file] = execution_time
+        data_return[map_file] = return_code
+
+    update_csv("../data/time_value.csv", data_time)
+    update_csv("../data/return_value.csv", data_return)
+
+
+
+def test_bsq_single(path):
+    if not make_binary("../" + path):
+        return
+    print(f"{bcolors.OKCYAN}{{==== START {path} BSQ ====}}{bcolors.RESET}")
+    exec_all_map_single("../" + path)
+    print(f"{bcolors.OKCYAN}{{====  END {path} BSQ  ====}}{bcolors.RESET}")
+
+def test_all_bsq_Single(dirs):
+    for d in dirs:
+        test_bsq_single(d)
+### SINGLE ###
+
+### MAIN ###
 def test_all_bsq():
     dirs = get_subdirectories()
     if mode == MODE.ONLY:
         dirs = only_dirs(dirs)
     if mode == MODE.EXCLUDE:
         dirs = exclude_dirs(dirs)
-    with ThreadPoolExecutor() as executor:
-        executor.map(test_bsq, dirs)
+    if threaded:
+        test_all_bsq_Threaded(dirs)
+    else:
+        test_all_bsq_Single(dirs)
 
 def argv_handling():
     if len(argv) == 1:
@@ -142,6 +202,7 @@ def argv_handling():
         return MODE.EXCLUDE
 
 mode = argv_handling()
+threaded = False
 
 def main():
     test_all_bsq()
