@@ -39,7 +39,7 @@ def parse_map_size(map_name):
         return float('inf')
 
 def sort_csv(data):
-    sorted_keys = sorted(data.keys(), key=parse_map_size)
+    sorted_keys = ['Language'] + sorted([k for k in data.keys() if k != 'Language'], key=parse_map_size)
     return {k: data[k] for k in sorted_keys}
 
 def update_csv(path, data):
