@@ -17,6 +17,6 @@ clean:
 	go clean
 
 fclean: clean
-	rm $(NAME)
+	rm $(NAME) -f
 
 re: fclean all

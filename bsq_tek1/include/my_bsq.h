@@ -53,7 +53,7 @@ int parcing_col(char **map, cordo_t *max, cordo_t *cordo, data_bsq_t *data);
 int resolve_bsq(char *filepath);
 int replace_square(char **map, data_bsq_t *data);
 cordo_t *set_max_cordo(char *filepath);
-int select_mode_ssq(int ac, char **av);
+int select_mode_bsq(int ac, char **av);
 int set_new_cordo(cordo_t *point, int new_x, int new_y);
 int sq_size_in_map(cordo_t *cordo, cordo_t *max, int size);
 int set_new_data(data_bsq_t *data, cordo_t *cordo, int new_size);

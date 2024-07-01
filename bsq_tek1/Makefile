@@ -48,4 +48,6 @@ fclean:	clean
 linked:
 	make -C ./lib/my re
 
+re: fclean all
+
 .PHONY: all clean fclean re
