@@ -1,0 +1,39 @@
+name: Test Compile
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: test_compile
+      run: |
+        for d in ../*/ ; do
+          if [ -f $d".bsq" ]; then
+              if [ -f $d"Makefile" ]; then
+                  make -C $d re > /dev/null
+                  if [ ! -f $d"bsq_learn" ]; then
+                      echo -e " \e[31m Error: bsq_learn not found in $d\e[0m"
+                      exit 1
+                  else
+                      echo -e " \e[32m bsq_learn found in $d\e[0m"
+                  fi
+                  make -C $d fclean > /dev/null
+              else
+                  if [ ! -f $d"bsq_learn" ]; then
+                      echo -e " \e[31m Error: bsq_learn not found in $d\e[0m"
+                      exit 1
+                  else
+                      echo -e " \e[32m bsq_learn found in $d\e[0m"
+                  fi
+              fi
+          fi
+        done
